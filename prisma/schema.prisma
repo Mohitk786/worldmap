@@ -1,0 +1,196 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ListingType {
+  PRODUCT_URL
+  SOCIAL_PROFILE
+}
+
+enum ListingStatus {
+  ACTIVE
+  UNDER_REVIEW
+  REMOVED
+}
+
+enum CheckoutStatus {
+  INITIATED
+  PENDING
+  SUCCEEDED
+  FAILED
+  EXPIRED
+}
+
+enum PaymentEventStatus {
+  RECEIVED
+  APPLIED
+  DUPLICATE_IGNORED
+  REJECTED
+}
+
+/// One row per country polygon in the world-atlas TopoJSON (seeded once from
+/// the same dataset the globe renders, so `topoId` always matches a real
+/// `feature.id` client-side). `priceFloor` is normally MIN_PAYMENT ($5); the
+/// one undisclosed "hidden country" easter egg just carries a lower value
+/// here — nothing in the UI ever names which one it is.
+model Country {
+  id                          String    @id @default(cuid())
+  topoId                      String    @unique
+  name                        String    @unique
+  slug                        String    @unique
+  priceFloor                  Int       @default(5)
+  firstClaimedByNormalizedKey String?
+  createdAt                   DateTime  @default(now())
+
+  listings Listing[]
+
+  @@index([slug])
+}
+
+/// A single owner's stake on a single country. Identity is (normalizedKey,
+/// countryId) — the same link can hold a completely separate, independently
+/// priced claim in every country it's staked in, which is what lets one
+/// owner collect multiple crowns across the map.
+model Listing {
+  id              String        @id @default(cuid())
+  type            ListingType
+  normalizedKey   String
+  platform        String?
+  destinationUrl  String
+  displayName     String
+  pitch           String?
+  description     String?
+  imageUrl        String?
+  faviconUrl      String?
+  countryId       String
+  country         Country       @relation(fields: [countryId], references: [id])
+  currentAmount   Int           @default(0)
+  status          ListingStatus @default(ACTIVE)
+  raiseCount      Int           @default(0)
+  early           Boolean       @default(false)
+  firstPaidAt     DateTime
+  lastPaidAt      DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  bids            Bid[]
+  clicks          Click[]
+  moderationFlags ModerationFlag[]
+
+  @@unique([normalizedKey, countryId])
+  @@index([countryId, currentAmount])
+  @@index([normalizedKey])
+  @@index([status])
+}
+
+model Bid {
+  id             String   @id @default(cuid())
+  listingId      String
+  listing        Listing  @relation(fields: [listingId], references: [id])
+  amount         Int
+  resultingTotal Int
+  checkoutId     String   @unique
+  checkout       Checkout @relation(fields: [checkoutId], references: [id])
+  createdAt      DateTime @default(now())
+
+  @@index([listingId, createdAt])
+  @@index([createdAt])
+}
+
+model Checkout {
+  id                   String         @id @default(cuid())
+  dodoSessionId        String         @unique
+  dodoPaymentId        String?        @unique
+  visitorId            String?
+  listingType          ListingType
+  targetNormalizedKey  String
+  targetPlatform       String?
+  targetDestinationUrl String
+  targetDisplayName    String
+  targetPitch          String?
+  targetDescription    String?
+  targetImageUrl       String?
+  targetFaviconUrl     String?
+  targetCountryId      String
+  amount               Int
+  status               CheckoutStatus @default(INITIATED)
+  tosAgreedAt          DateTime
+  createdAt            DateTime       @default(now())
+  expiresAt            DateTime
+  bid                  Bid?
+
+  @@index([dodoSessionId])
+  @@index([status, expiresAt])
+}
+
+model PaymentEvent {
+  id          String              @id @default(cuid())
+  provider    String              @default("dodo")
+  eventId     String              @unique
+  eventType   String
+  rawPayload  Json
+  status      PaymentEventStatus  @default(RECEIVED)
+  receivedAt  DateTime            @default(now())
+  processedAt DateTime?
+  error       String?
+
+  @@index([status])
+}
+
+model Click {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id])
+  visitorId String?
+  ipHash    String
+  userAgent String?
+  referrer  String?
+  isCounted Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([listingId, createdAt])
+  @@index([listingId, visitorId, createdAt])
+  @@index([ipHash, createdAt])
+}
+
+/// A real presence heartbeat (upserted by visitorId, not a fabricated
+/// counter) — powers "N watching" / "visitors in 72h" / the "online in
+/// <city>" ticker honestly. City/country only ever come from the host's own
+/// geo headers (e.g. Vercel's `x-vercel-ip-city`); when those aren't present
+/// (local dev, non-Vercel hosts) the fields stay null and the ticker simply
+/// has nothing to show — never a made-up location.
+model Visitor {
+  id          String   @id @default(cuid())
+  visitorId   String   @unique
+  city        String?
+  region      String?
+  countryCode String?
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  @@index([lastSeenAt])
+}
+
+model ModerationFlag {
+  id            String    @id @default(cuid())
+  listingId     String
+  listing       Listing   @relation(fields: [listingId], references: [id])
+  reason        String
+  reporterEmail String?
+  createdAt     DateTime  @default(now())
+  resolvedAt    DateTime?
+
+  @@index([listingId])
+  @@index([resolvedAt])
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}

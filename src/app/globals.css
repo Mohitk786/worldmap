@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0b1220;
+  --ink-deep: #070c16;
+  --panel: #131e33;
+  --panel-border: #223050;
+  --gold: #d4a24c;
+  --gold-soft: #e8c98a;
+  --teal: #3ec9b3;
+  --parchment: #f2e9d8;
+  --parchment-ink: #241c10;
+  --foreground: #ece6d6;
+  --muted: #8592aa;
+  --danger: #d8674a;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-deep: var(--ink-deep);
+  --color-panel: var(--panel);
+  --color-panel-border: var(--panel-border);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-teal: var(--teal);
+  --color-parchment: var(--parchment);
+  --color-parchment-ink: var(--parchment-ink);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-danger: var(--danger);
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--ink);
+  color: var(--foreground);
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--ink-deep);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--panel-border) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--panel-border);
+  border-radius: 999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.dossier-enter {
+  animation: dossier-slide 220ms ease-out;
+}
+
+@keyframes dossier-slide {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.float-tooltip-kap {
+  background: var(--panel) !important;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px !important;
+  padding: 8px 10px !important;
+  font: 13px/1.4 var(--font-sans) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.globe-tip strong {
+  font-family: var(--font-display);
+  color: var(--gold-soft);
+  font-weight: 600;
+}
+
+.globe-tip span {
+  color: var(--muted);
+}
+
+.claim-pulse {
+  animation: claim-pulse 900ms ease-out;
+}
+
+@keyframes claim-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 18px color-mix(in srgb, var(--gold) 0%, transparent);
+  }
+}
