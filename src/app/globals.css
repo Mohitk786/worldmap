@@ -125,3 +125,29 @@ body {
     box-shadow: 0 0 0 18px color-mix(in srgb, var(--gold) 0%, transparent);
   }
 }
+
+.globe-featured-badge {
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f4c542;
+  color: #241c10;
+  font: 700 12px/1 var(--font-sans);
+  padding: 6px 11px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #f4c542 35%, transparent), 0 4px 14px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  animation: featured-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes featured-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, #f4c542 35%, transparent), 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, #f4c542 15%, transparent), 0 4px 18px rgba(0, 0, 0, 0.5);
+  }
+}

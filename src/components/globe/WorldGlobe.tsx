@@ -13,6 +13,13 @@ const Globe = dynamic(() => import("react-globe.gl"), { ssr: false });
 const UNCLAIMED_COLOR = "#2a3448";
 const HOVER_RING = "#3ec9b3";
 
+// A publicly spotlighted premium territory — a $100 floor and a permanent
+// gold glow/badge, the opposite of the hidden low-floor easter egg.
+const FEATURED_COUNTRY = "Antarctica";
+const FEATURED_COLOR = "#f4c542";
+const FEATURED_COLOR_HOVER = "#ffda69";
+const FEATURED_BADGE = { lat: -75, lng: 15 };
+
 // A small curated set of distinct hues — assigned per country name (not per
 // bid amount) purely for visual variety, so owned countries read as a
 // colorful map rather than one color at varying opacity.
@@ -99,7 +106,10 @@ export function WorldGlobe({
     const name = (feature as CountryFeature).properties.name;
     const entry = board.countries[name];
     const top = entry?.listings[0];
-    if (!top) return name === hovered ? "#3a465f" : UNCLAIMED_COLOR;
+    if (!top) {
+      if (name === FEATURED_COUNTRY) return name === hovered ? FEATURED_COLOR_HOVER : FEATURED_COLOR;
+      return name === hovered ? "#3a465f" : UNCLAIMED_COLOR;
+    }
     return paletteColorFor(name);
   }
 
@@ -107,13 +117,15 @@ export function WorldGlobe({
     const name = (feature as CountryFeature).properties.name;
     const entry = board.countries[name];
     const top = entry?.listings[0];
-    const base = top ? 0.012 + 0.05 * Math.min(top.currentAmount / maxAmount, 1) : 0.006;
+    const unclaimedBase = name === FEATURED_COUNTRY ? 0.02 : 0.006;
+    const base = top ? 0.012 + 0.05 * Math.min(top.currentAmount / maxAmount, 1) : unclaimedBase;
     return name === hovered || name === selectedCountry ? base + 0.02 : base;
   }
 
   function strokeColor(feature: object): string {
     const name = (feature as CountryFeature).properties.name;
     if (name === selectedCountry) return HOVER_RING;
+    if (name === FEATURED_COUNTRY) return FEATURED_COLOR;
     if (name === hovered) return "#c9d3e4";
     return "#070c16";
   }
@@ -124,7 +136,8 @@ export function WorldGlobe({
     const top = entry?.listings[0];
     const safeName = escapeHtml(name);
     if (!top) {
-      return `<div class="globe-tip"><strong>${safeName}</strong><br/><span>Unclaimed — from ${formatUsd(entry?.priceFloor ?? 5)}</span></div>`;
+      const floorNote = name === FEATURED_COUNTRY ? "★ Featured territory — from" : "Unclaimed — from";
+      return `<div class="globe-tip"><strong>${safeName}</strong><br/><span>${floorNote} ${formatUsd(entry?.priceFloor ?? 5)}</span></div>`;
     }
     const safeOwner = escapeHtml(top.displayName);
     const safePitch = top.pitch ? `<br/><span>${escapeHtml(top.pitch)}</span>` : "";
@@ -154,6 +167,16 @@ export function WorldGlobe({
           onPolygonClick={(f) => onSelectCountry((f as CountryFeature).properties.name)}
           onPolygonHover={(f) => setHovered(f ? (f as CountryFeature).properties.name : null)}
           onGlobeReady={handleGlobeReady}
+          htmlElementsData={[FEATURED_BADGE]}
+          htmlLat={(d) => (d as typeof FEATURED_BADGE).lat}
+          htmlLng={(d) => (d as typeof FEATURED_BADGE).lng}
+          htmlAltitude={0.05}
+          htmlElement={() => {
+            const el = document.createElement("div");
+            el.className = "globe-featured-badge";
+            el.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7-5.4-4.7 7.1-.6L12 2Z"/></svg><span>Featured — $100</span>`;
+            return el;
+          }}
         />
       )}
     </div>

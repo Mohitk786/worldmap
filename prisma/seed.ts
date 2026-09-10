@@ -13,6 +13,12 @@ const db = new PrismaClient({ adapter });
 const HIDDEN_LOW_FLOOR_COUNTRY = "Bhutan";
 const HIDDEN_FLOOR = 1;
 
+// The opposite of the hidden country: a publicly spotlighted premium
+// territory with a much higher floor. Called out on the globe itself (see
+// FEATURED_COUNTRY in WorldGlobe.tsx) rather than kept secret.
+const FEATURED_COUNTRY = "Antarctica";
+const FEATURED_FLOOR = 100;
+
 async function main() {
   const features = getCountryFeatures();
   console.log(`Seeding ${features.length} countries from world-atlas...`);
@@ -20,7 +26,7 @@ async function main() {
   for (const feature of features) {
     const name = feature.properties.name;
     const topoId = typeof feature.id === "string" || typeof feature.id === "number" ? String(feature.id) : `name:${countrySlugFor(name)}`;
-    const priceFloor = name === HIDDEN_LOW_FLOOR_COUNTRY ? HIDDEN_FLOOR : DEFAULT_PRICE_FLOOR;
+    const priceFloor = name === HIDDEN_LOW_FLOOR_COUNTRY ? HIDDEN_FLOOR : name === FEATURED_COUNTRY ? FEATURED_FLOOR : DEFAULT_PRICE_FLOOR;
 
     await db.country.upsert({
       where: { name },
