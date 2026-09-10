@@ -13,8 +13,26 @@ const Globe = dynamic(() => import("react-globe.gl"), { ssr: false });
 const UNCLAIMED_COLOR = "#2a3448";
 const HOVER_RING = "#3ec9b3";
 
-function goldWithAlpha(alpha: number): string {
-  return `rgba(212, 162, 76, ${alpha.toFixed(2)})`;
+// A small curated set of distinct hues — assigned per country name (not per
+// bid amount) purely for visual variety, so owned countries read as a
+// colorful map rather than one color at varying opacity.
+const CLAIMED_PALETTE = [
+  "#e8a33d",
+  "#4fb8d6",
+  "#a687e0",
+  "#6fbf8b",
+  "#e08a9e",
+  "#e0c25a",
+  "#4fbfae",
+  "#e0805a",
+  "#7fa0d6",
+  "#c290c9",
+];
+
+function paletteColorFor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return CLAIMED_PALETTE[hash % CLAIMED_PALETTE.length]!;
 }
 
 export function WorldGlobe({
@@ -55,22 +73,34 @@ export function WorldGlobe({
 
   const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: "#0b1220", shininess: 4 }), []);
 
-  useEffect(() => {
-    const controls = globeRef.current?.controls();
-    if (!controls) return;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.35;
-    controls.enableDamping = true;
-    globeRef.current?.pointOfView({ lat: 18, lng: 12, altitude: 2.3 }, 0);
-  }, []);
+  // The globe's WebGL scene (and its OrbitControls) initializes
+  // asynchronously inside react-globe.gl — grabbing `.controls()` in a
+  // mount-time effect can run before it exists and silently no-op forever,
+  // and even `onGlobeReady` fires one tick before it's actually attached.
+  // Polling briefly is the reliable way to catch it.
+  function handleGlobeReady() {
+    globeRef.current?.pointOfView({ lat: 18, lng: 12, altitude: 1.6 }, 0);
+    let attempts = 0;
+    const tryEnableAutoRotate = () => {
+      const controls = globeRef.current?.controls();
+      if (controls) {
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.35;
+        controls.enableDamping = true;
+        return;
+      }
+      attempts += 1;
+      if (attempts < 40) setTimeout(tryEnableAutoRotate, 100);
+    };
+    tryEnableAutoRotate();
+  }
 
   function capColor(feature: object): string {
     const name = (feature as CountryFeature).properties.name;
     const entry = board.countries[name];
     const top = entry?.listings[0];
     if (!top) return name === hovered ? "#3a465f" : UNCLAIMED_COLOR;
-    const alpha = 0.45 + 0.55 * Math.min(top.currentAmount / maxAmount, 1);
-    return goldWithAlpha(alpha);
+    return paletteColorFor(name);
   }
 
   function altitude(feature: object): number {
@@ -123,6 +153,7 @@ export function WorldGlobe({
           polygonsTransitionDuration={250}
           onPolygonClick={(f) => onSelectCountry((f as CountryFeature).properties.name)}
           onPolygonHover={(f) => setHovered(f ? (f as CountryFeature).properties.name : null)}
+          onGlobeReady={handleGlobeReady}
         />
       )}
     </div>
