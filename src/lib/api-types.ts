@@ -42,15 +42,16 @@ export type ActivityItem = {
 
 export type ActivityResponse = {
   activity: ActivityItem[];
-  watching: number;
-  visitors72h: number;
+  /** Real DataFast analytics — null (not zero) whenever DataFast isn't configured or unreachable. */
+  watching: number | null;
+  visitors: number | null;
 };
 
 export type OnlinePing = { city: string | null; region: string | null; countryCode: string | null; lastSeenAt: string };
 
 export type StatsResponse = {
-  watching: number;
-  visitors72h: number;
+  watching: number | null;
+  visitors: number | null;
   online: OnlinePing[];
 };
 

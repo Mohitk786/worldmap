@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
-import { getPresenceStats } from "@/lib/presence";
+import { getOnlineCities } from "@/lib/presence";
+import { getVisitorStats } from "@/lib/datafast";
 
 export async function GET() {
-  const stats = await getPresenceStats();
-  return NextResponse.json(stats);
+  const [stats, online] = await Promise.all([getVisitorStats(), getOnlineCities()]);
+  return NextResponse.json({
+    watching: stats?.onlineNow ?? null,
+    visitors: stats?.totalVisitors ?? null,
+    online,
+  });
 }

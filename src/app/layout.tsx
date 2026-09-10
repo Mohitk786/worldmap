@@ -3,6 +3,7 @@ import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { siteConfig } from "@/lib/site-config";
 import { PresenceBeacon } from "@/components/PresenceBeacon";
 import "./globals.css";
+import Script from "next/script";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -29,6 +30,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}>
+      <head>
+        <Script
+          data-website-id="dfid_wWAHekDDEEChB5PxcnIac"
+          data-domain="worldmap.whos1.bid"
+          src="https://datafa.st/js/script.js"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className="min-h-full bg-ink text-foreground font-sans">
         {children}
         <PresenceBeacon />

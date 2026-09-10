@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getLatestActivity } from "@/lib/board";
-import { getPresenceStats } from "@/lib/presence";
+import { getVisitorStats } from "@/lib/datafast";
 
 export async function GET() {
-  const [activity, presence] = await Promise.all([getLatestActivity(20), getPresenceStats()]);
-  return NextResponse.json({ activity, watching: presence.watching, visitors72h: presence.visitors72h });
+  const [activity, stats] = await Promise.all([getLatestActivity(20), getVisitorStats()]);
+  return NextResponse.json({ activity, watching: stats?.onlineNow ?? null, visitors: stats?.totalVisitors ?? null });
 }

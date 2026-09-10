@@ -42,7 +42,7 @@ Without those three set, the map, globe, leaderboard, and admin panel all work �
 
 ## Honesty about live numbers
 
-Nothing on this site fabricates activity. "Watching now" and "visitors in 72h" come from a real per-visitor heartbeat (`src/lib/presence.ts`), not an invented counter. The "online in `<city>`" ticker only ever shows a city when the hosting platform's own geo headers (Vercel's `x-vercel-ip-city`, etc.) provide one — in local dev, or on a non-Vercel host, it's simply empty rather than made up.
+Nothing on this site fabricates activity. The header's "N watching now" badge is real DataFast analytics (`src/lib/datafast.ts`) — the same analytics provider the original worldmap.lol site uses. Set `DATAFAST_API_KEY` (Website Settings → API tab at datafa.st) to turn it on; leave it unset and the badge just doesn't render, it never falls back to a made-up number. The "online in `<city>`" ticker is separate — it's a real per-visitor heartbeat (`src/lib/presence.ts`) rather than DataFast, since DataFast's realtime/overview endpoints don't return a per-city breakdown; it only ever shows a city when the hosting platform's own geo headers (Vercel's `x-vercel-ip-city`, etc.) provide one — in local dev, or on a non-Vercel host, it's simply empty rather than made up.
 
 ## Demo data
 

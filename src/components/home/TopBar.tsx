@@ -10,7 +10,7 @@ export function TopBar({
 }: {
   raised: number;
   activeCountries: number;
-  watching: number;
+  watching: number | null;
   onOpenWorldOrder: () => void;
 }) {
   return (
@@ -25,7 +25,7 @@ export function TopBar({
       <div className="pointer-events-auto flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
         <span className="tabular text-gold-soft">{formatUsd(raised)} staked</span>
         <span className="tabular text-foreground">{activeCountries} territories claimed</span>
-        {watching > 0 && (
+        {watching !== null && watching > 0 && (
           <span className="flex items-center gap-1.5 text-teal">
             <span className="h-1.5 w-1.5 rounded-full bg-teal" />
             <span className="tabular">{watching} watching now</span>

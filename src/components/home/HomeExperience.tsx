@@ -13,7 +13,7 @@ const ACTIVITY_POLL_MS = 10000;
 
 export function HomeExperience({ initialBoard }: { initialBoard: BoardResponse }) {
   const [board, setBoard] = useState(initialBoard);
-  const [activity, setActivity] = useState<ActivityResponse>({ activity: [], watching: 0, visitors72h: 0 });
+  const [activity, setActivity] = useState<ActivityResponse>({ activity: [], watching: null, visitors: null });
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [worldOrderOpen, setWorldOrderOpen] = useState(false);
 
