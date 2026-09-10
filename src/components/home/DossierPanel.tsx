@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { IdCard } from "lucide-react";
 import { FaviconImg } from "@/components/FaviconImg";
 import { ClaimForm } from "@/components/home/ClaimForm";
 import { formatUsd } from "@/lib/format";
@@ -48,6 +50,13 @@ export function DossierPanel({ country, onClose }: { country: CountryBoardEntry;
                 {listing.pitch && <span className="block truncate text-xs text-muted">{listing.pitch}</span>}
               </a>
               <span className="tabular shrink-0 text-sm text-gold-soft">{formatUsd(listing.currentAmount)}</span>
+              <Link
+                href={`/pin/${encodeURIComponent(listing.normalizedKey)}`}
+                aria-label={`View ${listing.displayName}'s profile page`}
+                className="shrink-0 text-muted hover:text-gold-soft"
+              >
+                <IdCard size={16} strokeWidth={2} />
+              </Link>
             </li>
           ))}
         </ol>

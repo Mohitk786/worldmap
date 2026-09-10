@@ -14,12 +14,30 @@ export default function AppleIcon() {
           alignItems: "center",
           justifyContent: "center",
           background: "#0b1220",
-          color: "#d4a24c",
-          fontSize: 96,
-          fontWeight: 700,
         }}
       >
-        W
+        <div
+          style={{
+            position: "relative",
+            width: 108,
+            height: 108,
+            borderRadius: "50%",
+            border: "10px solid #d4a24c",
+            display: "flex",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -10,
+              right: -10,
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "#d4a24c",
+            }}
+          />
+        </div>
       </div>
     ),
     size

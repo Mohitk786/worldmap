@@ -15,12 +15,30 @@ export default function Icon() {
           justifyContent: "center",
           background: "#0b1220",
           borderRadius: 8,
-          color: "#d4a24c",
-          fontSize: 20,
-          fontWeight: 700,
         }}
       >
-        W
+        <div
+          style={{
+            position: "relative",
+            width: 20,
+            height: 20,
+            borderRadius: "50%",
+            border: "2px solid #d4a24c",
+            display: "flex",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -2,
+              right: -2,
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "#d4a24c",
+            }}
+          />
+        </div>
       </div>
     ),
     size
